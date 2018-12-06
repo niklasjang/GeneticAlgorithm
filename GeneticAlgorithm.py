@@ -32,4 +32,8 @@ child1 = Child(1)
 print("== Generated children ==")
 for i in range(len(children)):
 	print("index %d is %s" %(i, children[i].getStr()))
-print("========================",end="")	
+print("========================",end="\n\n")
+
+#Calculate 
+print("calculate")
+
