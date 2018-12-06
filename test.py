@@ -1,2 +1,2 @@
-POOL_SIZE = 20
-print(list(range(POOL_SIZE)))
+for i in range(5):
+	print(i)

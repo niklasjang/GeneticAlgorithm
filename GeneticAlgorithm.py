@@ -1,7 +1,7 @@
 import random
 import string
 import numpy as np
-POOL_SIZE = 20
+POOL_SIZE = 10
 '''
 Genetic Algorithm
 
@@ -11,82 +11,88 @@ class Child:
 	def __init__(self,_index):
 		self.index = _index
 		self.string= ""
+		self.fitness=0.0
+		self.probability=0.0
 
-
-	def getStr(self):
+	def setStr(self):
 		for i in range(10):
 			rndChar = random.choice(string.ascii_lowercase)
 			self.string +=rndChar
-		return self.string
-	def setFitness(self, _fitness):
-		self.fitness = _fitness
-		return 0
-	def getFitness(self):
-		return self.fitness
+
+	def setFitness(self):
+		my_str = self.string
+		ascii_value=0
+		for i in range(len(my_str)):
+			ascii_value += ord(my_str[i])-97   # Char - 'a'
+		self.fitness =float(ascii_value)/len(my_str)
+	
 	def setProbability(self,_sumOfFitness):
 		self.probability = self.fitness/_sumOfFitness
-	def getProbability(self):
-		return self.probability
+
+	
+
+
+def createChildren():
+	#Create an Child class array of size POOL_SIZE
+	children = []
+	for i in range(POOL_SIZE):	
+		children.append(Child(i))
+	return children
+
+def evalulateChildren(_children):
+	sumOfFitness = 0
+	for i in range(len(children)): # i : 0~9
+		children[i].setStr()
+		children[i].setFitness()
+		sumOfFitness += children[i].fitness
+	sumOfProbability = 0 #Defined just for check
+	for i in range(len(children)): # j : 0~9
+		children[i].setProbability(sumOfFitness)
+		sumOfProbability += children[i].probability
+		# print("%d'th sumOfProbability is %f" % (i,sumOfProbability))
+def printAttributesOfChildren(_children):
+	print("================================================",end="\n")
+	print("Generated string\tfitness\t\tprobability",end="\n\n")
+	for i in range(len(_children)):
+		print("index %d is %s\t%f\t%f" %(i, _children[i].string,_children[i].fitness,_children[i].probability))
+	print("================================================",end="\n\n")
+
+def getFittestGenes(_children,size):
+	prob_list = []
+	for i in range(len(_children)):
+		prob_list.append(_children[i].probability)
+	indexOfFittest = []
+	for i in range(size) :
+		indexOfFittest.append( np.random.choice(list(range(POOL_SIZE)), p=prob_list))
+	return indexOfFittest
+
 
 #Get Input String from user.
 print("== Please enter myStr ==")
 myStr = input()
-print("========================",end="\n\n")
 
-
-#Create an Child class array of size POOL_SIZE
-children = []
-for i in range(POOL_SIZE):	
-	children.append(Child(i))
-child1 = Child(1)
-print("== Generated children ==")
-for i in range(len(children)):
-	print("index %d is %s\t" %(i, children[i].getStr()),end="")
-	if( i%4 == 3):
-		print("\n")
-print("========================",end="\n\n")
-
-#Calculate fitness and Probability
-sumOfMyStr = 0
+#Evaluate myStr
+my_ascii_value = 0
 for k in range(len(myStr)):				
-	sumOfMyStr += ord(myStr[k])-97
-fienessOfMyStr = sumOfMyStr/len(myStr)
-
-
-for i in range(len(children)):
-	rndStr = children[i].getStr()
-	sumOfAscii = 0
-	sumOfFitness = 0
-	for j in range(len(rndStr)):
-		sumOfAscii += ord(rndStr[j])-97 # rndChar - 'a'
-		sumOfFitness +=float(sumOfAscii)/len(rndStr)
-	children[i].setFitness(sumOfAscii/len(rndStr))
-	children[i].setProbability(sumOfFitness)
-
-#print fitness
-print("== Calculated fitness ==")
-print("%s is %d"%(myStr,fienessOfMyStr))
-for i in range(len(children)):
-	print("index %d is %d\t" %(i, children[i].getFitness()),end="")
-	if( i%4 == 3):
-		print("\n")
+	my_ascii_value += ord(myStr[k])-97
+my_fitness= my_ascii_value/len(myStr)
+print("%s's fitness is \t%f"%(myStr, my_fitness))
 print("========================",end="\n\n")
 
-#print probability
-print("== Calculated Probability ==")
-print("%s is %d"%(myStr,fienessOfMyStr))
-for i in range(len(children)):
-	print("index %d is %f\t" %(i, children[i].getProbability()),end="")
-	if( i%4 == 3):
-		print("\n")
-print("========================",end="\n\n")
 
-#Select the fittest genes
-	
+
+#Create and Evaluate Chilren
+children = createChildren()
+evalulateChildren(children)
+
+#Check Attributes
+printAttributesOfChildren(children)
+
+#Select the fittest genes list size of N
 fittest = []
-for i in range(len(children)):
-	fittest.append(children[i].getProbability())
-value = np.random.choice(list(range(POOL_SIZE)), p=fittest)
-print(value)
+fittest = getFittestGenes(children,5)
+
+for i in fittest:
+	print (children[i].string)
 
 
