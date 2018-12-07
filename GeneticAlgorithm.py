@@ -19,12 +19,14 @@ class Child:
 	def setStr(self):
 		for i in range(INPUT_LEN):
 			rndChar = random.choice(string.ascii_lowercase)
+			# print("rndChar %c is attached to %s"%(rndChar, self.string))
 			self.string +=rndChar
 
 	def setFitness(self, _myStr):
 		child_str = self.string
 		ascii_value=0
 		for i in range(len(child_str)):
+			# print("%s %s %d"%(child_str, _myStr, i))
 			ascii_value += ord(child_str[i])-ord(_myStr[i])
 		gap = float(ascii_value)/len(child_str)
 		self.fitness = gap * gap
@@ -42,16 +44,17 @@ def createChildren():
 		children.append(Child(i))
 	return children
 
-def evalulateChildren(_children, _myStr):
+def evalulateChildren(_children, _myStr,_startIndex=0):
 	sumOfFitness = 0
-	for i in range(len(children)): # i : 0~9
-		children[i].setStr()
-		children[i].setFitness(_myStr)
-		sumOfFitness += children[i].fitness
+	for i in range(len(_children)): # i : 0~9
+		if( (_startIndex ==0 ) or (_startIndex != 0 and i>= _startIndex)):
+			_children[i].setStr() 
+		_children[i].setFitness(_myStr)
+		sumOfFitness += _children[i].fitness
 	sumOfProbability = 0 #Defined just for check
-	for i in range(len(children)): # j : 0~9
-		children[i].setProbability(sumOfFitness)
-		sumOfProbability += children[i].probability
+	for i in range(len(_children)): # j : 0~9
+		_children[i].setProbability(sumOfFitness)
+		sumOfProbability += _children[i].probability
 		# print("%d'th sumOfProbability is %f" % (i,sumOfProbability)) #To Check it is up to 1 or not.
 def printAttributesOfChildren(_children):
 	print("================================================",end="\n")
@@ -75,10 +78,15 @@ def crossoverChildren(_nextGeneration, _children, _fittestIndex):
 	print("rndInt is %d"%rndInt)
 	j=0
 	for i in range(0,len(_fittestIndex),2):
-		print (_fittestIndex[i])
 		newString = _children[_fittestIndex[i]].string[:rndInt] + _children[_fittestIndex[i+1]].string[rndInt:]
+		print("newString %s is assign to newGen's %dth index"%(newString,j))
 		_nextGeneration[j].string = newString
 		j += 1
+		# print(j) #newGeneration의 j 번째부터 넣ㅇ면 된다. 
+
+	evalulateChildren(_nextGeneration, myStr, j)
+	return _nextGeneration
+
 
 
 #Get Input String from user.
@@ -101,6 +109,6 @@ fittestIndex = getFittestGenes(children,SELECTION_SIZE)
 print(fittestIndex)
 #
 nextGeneration = createChildren()
-crossoverChildren(nextGeneration, children, fittestIndex)
+nextGeneration = crossoverChildren(nextGeneration, children, fittestIndex)
 
-
+printAttributesOfChildren(nextGeneration)
