@@ -1,7 +1,7 @@
 import random
 import string
 import numpy as np
-POOL_SIZE = 10
+POOL_SIZE = 100
 INPUT_LEN = 5
 SELECTION_SIZE = 6 #Must be even number
 '''
@@ -28,7 +28,7 @@ class Child:
 					self.string += chr(ord(rndChar) + 1)
 				else :
 					self.string += chr(ord(rndChar) - 1)
-				print("mutation invoked!")
+				# print("mutation invoked!")
 				self.mutation = 0
 			else :
 				self.string +=rndChar
@@ -96,16 +96,23 @@ def crossoverChildren(_nextGeneration, _children, _fittestIndex):
 	j=0
 	for i in range(0,len(_fittestIndex),2):
 		newString = _children[_fittestIndex[i]].string[:rndInt] + _children[_fittestIndex[i+1]].string[rndInt:]
-		print("newString %s is assign to newGen's %dth index"%(newString,j))
+		# print("newString %s is assign to newGen's %dth index"%(newString,j))
 		_nextGeneration[j].string = newString
 		j += 1
-		# print(j) #newGeneration의 j 번째부터 넣ㅇ면 된다. 
 
 	evalulateChildren(_nextGeneration, myStr, j)
 	return _nextGeneration
 
 
-def evolution(times):
+def evolution(_pastG, _nextG, _fittestIndex):	
+	_nextG = crossoverChildren(_nextG, _pastG, _fittestIndex)
+	# printAttributesOfChildren(_nextG)
+	fittestIndex = []
+	fittestIndex = getFittestGenes(_nextG,SELECTION_SIZE)
+	print("%s %s %s" %(_nextG[0].string, _nextG[1].string, _nextG[2].string))
+	return _nextG, fittestIndex
+
+
 #Get Input String from user.
 print("====== Please enter myStr ======")
 myStr = input()
@@ -113,20 +120,16 @@ print("================================",end="\n\n")
 
 
 
-#Create and Evaluate Chilren
+#Create and Evaluate Chilren and Check Attributes
 children = createChildren()
 evalulateChildren(children,myStr)
-
-#Check Attributes
-printAttributesOfChildren(children)
-
-
+# printAttributesOfChildren(children)
 #Select  index of the fittest genes list size of SELECTION_SIZE
 fittestIndex = []
 fittestIndex = getFittestGenes(children,SELECTION_SIZE)
-# print(fittestIndex)
-#
-nextGeneration = createChildren()
-nextGeneration = crossoverChildren(nextGeneration, children, fittestIndex)
+print("%s %s %s" %(children[0].string, children[1].string, children[2].string))
 
-printAttributesOfChildren(nextGeneration)
+for i in range( 100):
+	nextGeneration = createChildren()
+	children, fittestIndex = evolution(children, nextGeneration,fittestIndex)
+
