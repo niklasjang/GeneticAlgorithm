@@ -2,6 +2,8 @@ import random
 import string
 import numpy as np
 POOL_SIZE = 10
+INPUT_LEN = 5
+SELECTION_SIZE = 6 #Must be even number
 '''
 Genetic Algorithm
 
@@ -15,19 +17,20 @@ class Child:
 		self.probability=0.0
 
 	def setStr(self):
-		for i in range(10):
+		for i in range(INPUT_LEN):
 			rndChar = random.choice(string.ascii_lowercase)
 			self.string +=rndChar
 
-	def setFitness(self):
-		my_str = self.string
+	def setFitness(self, _myStr):
+		child_str = self.string
 		ascii_value=0
-		for i in range(len(my_str)):
-			ascii_value += ord(my_str[i])-97   # Char - 'a'
-		self.fitness =float(ascii_value)/len(my_str)
-	
+		for i in range(len(child_str)):
+			ascii_value += ord(child_str[i])-ord(_myStr[i])
+		gap = float(ascii_value)/len(child_str)
+		self.fitness = gap * gap
+
 	def setProbability(self,_sumOfFitness):
-		self.probability = self.fitness/_sumOfFitness
+		self.probability = (1.0 - (self.fitness/_sumOfFitness) - (1.0/POOL_SIZE)) / (POOL_SIZE-2)
 
 	
 
@@ -39,17 +42,17 @@ def createChildren():
 		children.append(Child(i))
 	return children
 
-def evalulateChildren(_children):
+def evalulateChildren(_children, _myStr):
 	sumOfFitness = 0
 	for i in range(len(children)): # i : 0~9
 		children[i].setStr()
-		children[i].setFitness()
+		children[i].setFitness(_myStr)
 		sumOfFitness += children[i].fitness
 	sumOfProbability = 0 #Defined just for check
 	for i in range(len(children)): # j : 0~9
 		children[i].setProbability(sumOfFitness)
 		sumOfProbability += children[i].probability
-		# print("%d'th sumOfProbability is %f" % (i,sumOfProbability))
+		# print("%d'th sumOfProbability is %f" % (i,sumOfProbability)) #To Check it is up to 1 or not.
 def printAttributesOfChildren(_children):
 	print("================================================",end="\n")
 	print("Generated string\tfitness\t\tprobability",end="\n\n")
@@ -66,33 +69,38 @@ def getFittestGenes(_children,size):
 		indexOfFittest.append( np.random.choice(list(range(POOL_SIZE)), p=prob_list))
 	return indexOfFittest
 
+	#Afer crossover, assign to newGeneration's child's string
+def crossoverChildren(_nextGeneration, _children, _fittestIndex):
+	rndInt = 1+(np.random.randint(INPUT_LEN-1, size=1))[0] # rndInt : 1~INPUT_LEN-1
+	print("rndInt is %d"%rndInt)
+	j=0
+	for i in range(0,len(_fittestIndex),2):
+		print (_fittestIndex[i])
+		newString = _children[_fittestIndex[i]].string[:rndInt] + _children[_fittestIndex[i+1]].string[rndInt:]
+		_nextGeneration[j].string = newString
+		j += 1
+
 
 #Get Input String from user.
-print("== Please enter myStr ==")
+print("====== Please enter myStr ======")
 myStr = input()
-
-#Evaluate myStr
-my_ascii_value = 0
-for k in range(len(myStr)):				
-	my_ascii_value += ord(myStr[k])-97
-my_fitness= my_ascii_value/len(myStr)
-print("%s's fitness is \t%f"%(myStr, my_fitness))
-print("========================",end="\n\n")
+print("================================",end="\n\n")
 
 
 
 #Create and Evaluate Chilren
 children = createChildren()
-evalulateChildren(children)
+evalulateChildren(children,myStr)
 
 #Check Attributes
 printAttributesOfChildren(children)
 
-#Select the fittest genes list size of N
-fittest = []
-fittest = getFittestGenes(children,5)
-
-for i in fittest:
-	print (children[i].string)
+#Select  index of the fittest genes list size of SELECTION_SIZE
+fittestIndex = []
+fittestIndex = getFittestGenes(children,SELECTION_SIZE)
+print(fittestIndex)
+#
+nextGeneration = createChildren()
+crossoverChildren(nextGeneration, children, fittestIndex)
 
 
