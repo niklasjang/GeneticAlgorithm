@@ -15,13 +15,30 @@ class Child:
 		self.string= ""
 		self.fitness=0.0
 		self.probability=0.0
+		self.mutation = 0
 
 	def setStr(self):
 		for i in range(INPUT_LEN):
 			rndChar = random.choice(string.ascii_lowercase)
 			# print("rndChar %c is attached to %s"%(rndChar, self.string))
-			self.string +=rndChar
+			self.getMutation()
+			if(self.mutation == 1):
+				# chr(ord(rndChar) + 1)
+				if(rndChar != 'z'):
+					self.string += chr(ord(rndChar) + 1)
+				else :
+					self.string += chr(ord(rndChar) - 1)
+				print("mutation invoked!")
+				self.mutation = 0
+			else :
+				self.string +=rndChar
 
+	def getMutation(self):
+		mlist =[1,0]
+		prob = [0.9, 0.1]
+		if( np.random.choice(mlist, p=prob) == 0):
+			self.mutation = 1
+		
 	def setFitness(self, _myStr):
 		child_str = self.string
 		ascii_value=0
@@ -75,7 +92,7 @@ def getFittestGenes(_children,size):
 	#Afer crossover, assign to newGeneration's child's string
 def crossoverChildren(_nextGeneration, _children, _fittestIndex):
 	rndInt = 1+(np.random.randint(INPUT_LEN-1, size=1))[0] # rndInt : 1~INPUT_LEN-1
-	print("rndInt is %d"%rndInt)
+	# print("rndInt is %d"%rndInt)
 	j=0
 	for i in range(0,len(_fittestIndex),2):
 		newString = _children[_fittestIndex[i]].string[:rndInt] + _children[_fittestIndex[i+1]].string[rndInt:]
@@ -88,7 +105,7 @@ def crossoverChildren(_nextGeneration, _children, _fittestIndex):
 	return _nextGeneration
 
 
-
+def evolution(times):
 #Get Input String from user.
 print("====== Please enter myStr ======")
 myStr = input()
@@ -103,10 +120,11 @@ evalulateChildren(children,myStr)
 #Check Attributes
 printAttributesOfChildren(children)
 
+
 #Select  index of the fittest genes list size of SELECTION_SIZE
 fittestIndex = []
 fittestIndex = getFittestGenes(children,SELECTION_SIZE)
-print(fittestIndex)
+# print(fittestIndex)
 #
 nextGeneration = createChildren()
 nextGeneration = crossoverChildren(nextGeneration, children, fittestIndex)
